@@ -41,6 +41,33 @@ attackType = round(random(1));
 move = 0;
 
 pool = 0;
+
+roll = random(1);
+alarm[0] = room_speed/2;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="2" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>roll = random(1);
+alarm[0] = room_speed/2;
 </string>
           </argument>
         </arguments>
@@ -63,12 +90,18 @@ pool = 0;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>var acc;
+            <string>var dir, dis, acc;
+dir = point_direction(x, y, obj_player.x, obj_player.y);
+dis = point_distance(x, y, obj_player.x, obj_player.y);
 acc = 2 - hurt;
 
 if (canAttack) {
     move = 0;
-    if (keyboard_check_pressed(ord('Z')) &amp;&amp; !hurt) {
+    
+    if (dir &gt; 90 &amp;&amp; dir &lt; 270) face = -1;
+    else face = 1;
+    
+    if (dis &lt; 16 &amp;&amp; !hurt) {
         move = 2;
         canAttack = 0;
         attackType = round(random(1));
@@ -77,29 +110,46 @@ if (canAttack) {
         o.image_xscale = 1.5*face;
         o.image_yscale = 1.5;
         o.image_single = attackType;
-    }
-    else if (keyboard_check_pressed(ord('X'))) {
-        face = -face;
+        o.type = 1; //Make it an enemy slash
     }
     else {
-        if (keyboard_check(vk_up)) {
-            move = 1;
-            y -= acc;
+        var safe;
+        if (hurt) safe = 0;
+        else safe = 1;
+        
+        if (instance_exists(obj_slice)) {
+            if (!instance_nearest(x, y, obj_slice).type &amp;&amp; dis &lt; 32) safe = 0;
         }
         
-        if (keyboard_check(vk_down)) {
+        if (roll &lt; 0.5 &amp;&amp; safe &amp;&amp; !obj_player.hurt) {
             move = 1;
-            y += acc;
+            if (obj_player.x &gt; x) x += 2;
+            else if (obj_player.x &lt; x) x -= 2;
+            
+            if (obj_player.y &gt; y) y += 2;
+            else if (obj_player.y &lt; y) y -= 2;
         }
         
-        if (keyboard_check(vk_left)) {
+        if (roll &gt; 0.5 &amp;&amp; roll &lt; 0.7 || !safe) {
             move = 1;
-            x -= acc;
+            if (dis &lt; 42) {
+                if (obj_player.x &gt; x) x -= 2;
+                else if (obj_player.x &lt; x) x += 2;
+                
+                if (obj_player.y &gt; y) y -= 2;
+                else if (obj_player.y &lt; y) y += 2;
+            }
         }
         
-        if (keyboard_check(vk_right)) {
+        if (roll &gt; 0.85) {
             move = 1;
-            x += acc;
+            x += lengthdir_x(2, dir - 90);
+            y += lengthdir_y(2, dir - 90);
+        }
+        else if (roll &gt; 0.7) {
+            move = 1;
+            x += lengthdir_x(2, dir + 90);
+            y += lengthdir_y(2, dir + 90);
         }
     }
 }
@@ -189,35 +239,6 @@ else {
     if (hp &lt; 1) hp += (1-hp)/10 + 0.001;
     else hp = 1;
 }
-
-/*
-var acc;
-acc = 0.2;
-
-if (speed &gt; 0.1) {
-    motion_add(direction + 180, speed/10);
-    image_speed = 0.2;
-    if (sprite_index != spr_ninja_walk) sprite_index = spr_ninja_walk;
-}
-else {
-    speed = 0;
-    image_speed = 0.075;
-    if (sprite_index != spr_ninja_stand) sprite_index = spr_ninja_stand;
-}
-
-if (keyboard_check(vk_up)) motion_add(90, acc);
-if (keyboard_check(vk_down)) motion_add(270, acc);
-if (keyboard_check(vk_left)) motion_add(180, acc);
-if (keyboard_check(vk_right)) motion_add(0, acc);
-
-if (speed &gt; maxSpeed) speed = maxSpeed;
-*/
-
-//debug
-if (keyboard_check(vk_escape)) game_end();
-if (keyboard_check(ord('R'))) game_restart();
-
-if (keyboard_check_pressed(ord('Q'))) hurt = 1 - hurt;
 </string>
           </argument>
         </arguments>
@@ -240,7 +261,7 @@ if (keyboard_check_pressed(ord('Q'))) hurt = 1 - hurt;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (other.type) hurt = 1;
+            <string>if (!other.type) hurt = 1;
 </string>
           </argument>
         </arguments>
@@ -273,20 +294,6 @@ draw_sprite_ext(sprite_index, image_index, x, y, image_xscale * face, image_ysca
 
 d3d_set_fog(0, c_black, 0, 0);
 
-//Health Background
-draw_set_color(c_black);
-draw_rectangle(view_xview + 4 + 32 - 8, view_yview + view_hview - 4 - 8, view_xview + view_wview - 4 - 8, view_yview + view_hview - 12 - 8, 0);
-
-//Health Bar
-draw_set_color(healthColor);
-draw_rectangle(view_xview + 4 + 32 - 8, view_yview + view_hview - 4 - 8, view_xview + 4 + 32 + (view_wview - 4 - 32 - 4 - 8)*hp, view_yview + view_hview - 12 - 8, 0);
-
-//Health Border
-draw_set_color(c_white);
-draw_rectangle(view_xview + 3 + 32 - 8, view_yview + view_hview - 4 - 8, view_xview + view_wview - 4 - 8, view_yview + view_hview - 13 - 8, 1);
-
-if (hp &gt; 0) hudSpeed += 0.2 - 0.15*hurt;
-else hudSpeed = attackCount;
 
 var spr;
 if (hurt) {
@@ -295,7 +302,7 @@ if (hurt) {
     
     var canBleed;
     canBleed = random(1);
-    if (canBleed &gt; 0.60) tile_add(bkg_blood, irandom(3)*16, irandom(1)*16, 16, 16, x - 8 + pool*(1 - random(2)), y - 3 + pool*(1 - random(2)), 1000000);
+    if (canBleed &gt; 0.60) tile_add(bkg_blood, irandom(3)*16, irandom(1)*16, 16, 16, x - 8 + pool*(1 - random(2)), y - 3 + pool*(1 - random(2)), 1000001);
 }
 else spr = spr_ninja_stand; 
 draw_sprite_ext(spr, hudSpeed, view_xview + 24, view_yview + view_hview - 32, 3 * face, 3, image_angle, image_blend, image_alpha);

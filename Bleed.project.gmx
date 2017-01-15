@@ -15,13 +15,17 @@
       <sprite>sprites\spr_ninja_die</sprite>
       <sprite>sprites\spr_ninja_walk</sprite>
     </sprites>
+    <sprite>sprites\spr_slice</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\bkg_bamboo</background>
+    <background>background\bkg_blood</background>
   </backgrounds>
   <paths name="paths"/>
   <objects name="objects">
     <object>objects\obj_player</object>
+    <object>objects\obj_enemy</object>
+    <object>objects\obj_slice</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\rm_game</room>
