@@ -101,7 +101,7 @@ if (canAttack) {
     if (dir &gt; 90 &amp;&amp; dir &lt; 270) face = -1;
     else face = 1;
     
-    if (dis &lt; 16 &amp;&amp; !hurt) {
+    if (dis &lt; 16 &amp;&amp; !hurt &amp;&amp; !obj_player.hurt) {
         move = 2;
         canAttack = 0;
         attackType = round(random(1));
@@ -222,7 +222,7 @@ switch(move) {
 
 if (hurt) {
     healthColor = c_white;
-    if (hp &gt; 0) hp -= 0.005;
+    if (hp &gt; 0) hp -= 0.01;
     else {
         move = 4;
         canAttack = 0;
@@ -230,9 +230,13 @@ if (hurt) {
     }
     
     if (move == 0 || move == 4) {
-        if (pool &lt; 10) pool += 0.005;
+        if (pool &lt; 10) pool += 0.05;
     }
     else pool = 0;
+    
+    var canBleed;
+    canBleed = random(1);
+    if (canBleed &gt; 0.60 &amp;&amp; pool &lt; 10) tile_add(bkg_blood, irandom(3)*16, irandom(1)*16, 16, 16, x - 8 + pool*(1 - random(2)), y - 3 + pool*(1 - random(2))/2, 1000001);
 }
 else {
     healthColor = c_red;
@@ -261,7 +265,7 @@ else {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (!other.type) hurt = 1;
+            <string>if (!other.type &amp;&amp; abs(y-other.y) &lt; 8) hurt = 1;
 </string>
           </argument>
         </arguments>
@@ -299,13 +303,10 @@ var spr;
 if (hurt) {
     if (hp &gt; 0) spr = spr_ninja_injured;
     else spr = spr_ninja_die;
-    
-    var canBleed;
-    canBleed = random(1);
-    if (canBleed &gt; 0.60) tile_add(bkg_blood, irandom(3)*16, irandom(1)*16, 16, 16, x - 8 + pool*(1 - random(2)), y - 3 + pool*(1 - random(2)), 1000001);
 }
 else spr = spr_ninja_stand; 
-draw_sprite_ext(spr, hudSpeed, view_xview + 24, view_yview + view_hview - 32, 3 * face, 3, image_angle, image_blend, image_alpha);
+
+depth = -y;
 </string>
           </argument>
         </arguments>
