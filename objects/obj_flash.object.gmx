@@ -25,7 +25,9 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>image_alpha = 0.5;
+            <string>image_alpha = 1;
+target = self;
+face = 1;
 </string>
           </argument>
         </arguments>
@@ -48,11 +50,41 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>image_xscale += 0.05;
-image_yscale += 0.05;
+            <string>image_xscale += 0.0125;
+image_yscale += 0.0125;
 
-image_alpha -= 0.05;
+image_alpha -= 0.025;
 if (image_alpha &lt;= 0) instance_destroy();
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="8" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>sprite_index = target.sprite_index;
+image_single = target.image_index;
+x = target.x;
+y = target.y;
+
+d3d_set_fog(1, c_white, 0, 0);
+draw_sprite_ext(sprite_index, image_index, x, y, image_xscale * face, image_yscale, image_angle, image_blend, image_alpha);
+d3d_set_fog(0, c_black, 0, 0);
 </string>
           </argument>
         </arguments>

@@ -27,13 +27,18 @@
             <kind>1</kind>
             <string>step = 0;
 fadeAlpha = 1;
+fadeColor = c_black;
 titleAlpha = 1;
 alarm[0] = room_speed*5;
 
-time = room_speed*30;
+shake = 0;
+
+time = room_speed*20;
 
 shift = 64;
 shiftChange = 0.75;
+
+global.debug = 1;
 </string>
           </argument>
         </arguments>
@@ -78,11 +83,13 @@ switch(edge) {
     break;
 }
 
-e = instance_create(xx, yy, obj_enemy);
+instance_create(xx, yy, obj_enemy);
+
+instance_create(32 + random(room_width - 64), 32 + random(room_height - 64), obj_sushi);
 
 alarm[1] = time;
 
-time = 0.8*time;
+time = 0.9*time;
 </string>
           </argument>
         </arguments>
@@ -128,26 +135,54 @@ time = 0.8*time;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>draw_set_halign(fa_center);
+            <string>//Draw HUD
+var vOff;
+vOff = 128*titleAlpha;
+
+if (shake &gt; 0) shake -= shake/20 + 0.005;
+
+
+draw_set_alpha(1 - titleAlpha);
+//Health Background
+draw_set_color(c_black);
+draw_rectangle(view_xview + 4 + 32 - 8 + random(shake), view_yview + view_hview - 4 - 8 + vOff + random(shake), view_xview + 4 + 32 - 8 + view_wview*0.75*obj_player.maxHp + random(shake), view_yview + view_hview - 12 - 8 + vOff + random(shake), 0);
+
+//Health Bar
+draw_set_color(obj_player.healthColor);
+if (obj_player.hp &gt; 0) draw_rectangle(view_xview + 4 + 32 - 8 + random(shake), view_yview + view_hview - 4 - 8 + vOff + random(shake), view_xview + 4 + 32 - 8 + view_wview*0.75*obj_player.hp + random(shake), view_yview + view_hview - 12 - 8 + vOff + random(shake), 0);
+
+//Health Border
+draw_set_color(c_white);
+draw_rectangle(view_xview + 3 + 32 - 8 + random(shake), view_yview + view_hview - 4 - 8 + vOff + random(shake), view_xview + 4 + 32 - 8 + view_wview*0.75*obj_player.maxHp + random(shake), view_yview + view_hview - 13 - 8 + vOff + random(shake), 1);
+
+if (obj_player.hp &gt; 0) obj_player.hudSpeed += 0.2 - 0.15*obj_player.hurt;
+else obj_player.hudSpeed = obj_player.attackCount;
+
+var spr;
+if (obj_player.hurt) {
+    if (obj_player.hp &gt; 0) spr = spr_ninja_injured;
+    else spr = spr_ninja_die;
+}
+else spr = spr_ninja_stand; 
+draw_sprite_ext(spr, obj_player.hudSpeed, view_xview + 24 + random(shake), view_yview + view_hview - 32 + vOff + random(shake), 3 * obj_player.face, 3, obj_player.image_angle, obj_player.image_blend, 1 - titleAlpha);
+
+
+//Draw Title
+
+draw_set_halign(fa_center);
 
 draw_set_color(c_red);
 draw_set_alpha(titleAlpha);
 
 draw_set_font(fnt_title);
-draw_text(view_xview + view_wview/2 - shift, view_yview - 28, "BLEED");
+draw_text(view_xview + view_wview/2 + shift, view_yview - 28, "BLEED");
 
 draw_set_font(fnt_text);
-draw_text(view_xview + view_wview/2 + shift, view_yview + view_hview - 36, "CREATED BY DEFACID FOR GM48");
+draw_text(view_xview + view_wview/2 - shift, view_yview + view_hview - 36, "CREATED BY DEFACID FOR GM48");
 
-if (obj_player.hp &lt;= 0) {
-    titleAlpha += 0.05;
-    draw_set_font(fnt_die);
-    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 - 64, "YOU DIED");
-    draw_set_font(fnt_tiny);
-    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 + 36, "Press 'R' to Restart");
-}
 
 if (step != 2) {
+    if (fadeAlpha &gt; 0) fadeAlpha -= 0.05;
     shift -= shiftChange;
     if (step == 1) shiftChange = shiftChange * 1.1;
     
@@ -159,16 +194,48 @@ if (step != 2) {
     }
 }
 
-if (fadeAlpha &gt; 0) fadeAlpha -= 0.05;
-
+// Draw Fade 
 draw_set_alpha(fadeAlpha);
-draw_set_color(c_black);
+draw_set_color(fadeColor);
 draw_rectangle(-1, -1, room_width, room_height, 0);
 
-if (mouse_check_button_pressed(mb_left)) {
-    step = 1;
-    instance_create(mouse_x, mouse_y, obj_enemy);
+
+//Draw Game Over
+if (obj_player.hp &lt;= 0) {
+    if (titleAlpha &lt; 1) titleAlpha += 0.05;
+    if (fadeAlpha &lt; 0.75) fadeAlpha += 0.01;
+    fadeColor = c_red;
+    
+    draw_set_alpha(titleAlpha);
+    draw_set_color(c_white);
+    draw_set_font(fnt_die);
+    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 - 64, "YOU DIED");
+    draw_set_font(fnt_tiny);
+    draw_set_color(c_white);
+    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 + 36, "Press [R] to Restart");
 }
+
+draw_set_alpha(1);
+
+
+//Debug
+if (global.debug) {
+    if (mouse_check_button_pressed(mb_left)) {
+        step = 1;
+        instance_create(mouse_x, mouse_y, obj_enemy);
+    }
+    
+    if (mouse_check_button_pressed(mb_right)) {
+        step = 1;
+        instance_create(mouse_x, mouse_y, obj_sushi);
+    }
+}
+
+
+
+
+
+
 </string>
           </argument>
         </arguments>

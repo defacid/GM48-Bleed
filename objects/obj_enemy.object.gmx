@@ -28,6 +28,8 @@
             <string>image_speed = 0.1;
 maxSpeed = 1;
 
+inbounds = 0;
+
 hurt = 0;
 hp = 1;
 healthColor = c_red; //Health flashes white when hit
@@ -118,21 +120,34 @@ if (canAttack) {
         else safe = 1;
         
         if (instance_exists(obj_slice)) {
-            if (!instance_nearest(x, y, obj_slice).type &amp;&amp; dis &lt; 32) safe = 0;
+            if (!instance_nearest(x, y, obj_slice).type) {
+                if (obj_player.face != face &amp;&amp; dis &lt; 64) safe = 0;
+                else if (dis &lt; 24) safe = 0;
+            }
         }
         
         if (roll &lt; 0.5 &amp;&amp; safe &amp;&amp; !obj_player.hurt) {
             move = 1;
-            if (obj_player.x &gt; x) x += 2;
-            else if (obj_player.x &lt; x) x -= 2;
+            if (obj_player.x &gt; x + 1) x += 2;
+            else if (obj_player.x &lt; x - 1) x -= 2;
             
-            if (obj_player.y &gt; y) y += 2;
-            else if (obj_player.y &lt; y) y -= 2;
+            if (obj_player.y &gt; y + 1) y += 2;
+            else if (obj_player.y &lt; y - 1) y -= 2;
         }
         
-        if (roll &gt; 0.5 &amp;&amp; roll &lt; 0.7 || !safe) {
+        if (!safe) {
             move = 1;
-            if (dis &lt; 42) {
+            
+            if (instance_exists(obj_sushi) &amp;&amp; hurt &amp;&amp; roll &lt; 0.2) {
+                var sushi;
+                sushi = instance_nearest(x, y, obj_sushi);
+                if (sushi.x &gt; x) x -= 2;
+                else if (sushi.x &lt; x) x += 2;
+                
+                if (sushi.y &gt; y) y -= 2;
+                else if (sushi.y &lt; y) y += 2;
+            }
+            else if (dis &lt; 64) {
                 if (obj_player.x &gt; x) x -= 2;
                 else if (obj_player.x &lt; x) x += 2;
                 
@@ -248,6 +263,39 @@ else {
         </arguments>
       </action>
     </event>
+    <event eventtype="4" ename="obj_sushi">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (abs(y-other.y) &lt; 8 &amp;&amp; other.fall == 1) {
+    hurt = 0;
+    
+    f = instance_create(x, y, obj_flash);
+    f.sprite_index = sprite_index;
+    f.image_single = image_index;
+    f.face = face;
+    f.target = self;
+    
+    with(other) instance_destroy();
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
     <event eventtype="4" ename="obj_slice">
       <action>
         <libid>1</libid>
@@ -288,7 +336,11 @@ else {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>var canFlash;
+            <string>draw_set_alpha(0.4);
+draw_set_color(c_black);
+draw_ellipse(x - 6 - 1, y + 8 - 2, x + 6 - 1, y + 8 + 3, 0);
+
+var canFlash;
 canFlash = random(1);
 if (hurt &amp;&amp; hp &gt; 0 &amp;&amp; canFlash &gt; 0.9) {
     d3d_set_fog(1, c_red, 0, 0);

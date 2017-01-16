@@ -29,7 +29,8 @@
 maxSpeed = 1;
 
 hurt = 0;
-hp = 1;
+maxHp = 1;
+hp = maxHp;
 healthColor = c_red; //Health flashes white when hit
 hudSpeed = 0;
 face = 1;
@@ -41,6 +42,8 @@ attackType = round(random(1));
 move = 0;
 
 pool = 0;
+
+godMode = 0;
 </string>
           </argument>
         </arguments>
@@ -190,8 +193,8 @@ if (hurt) {
 }
 else {
     healthColor = c_red;
-    if (hp &lt; 1) hp += (1-hp)/10 + 0.001;
-    else hp = 1;
+    if (hp &lt; maxHp) hp += (1-hp)/10 + 0.001;
+    else hp = maxHp;
 }
 
 /*
@@ -217,11 +220,55 @@ if (keyboard_check(vk_right)) motion_add(0, acc);
 if (speed &gt; maxSpeed) speed = maxSpeed;
 */
 
+if (x &lt; 0) x = 0;
+if (x &gt; room_width) x = room_width;
+if (y &lt; 0) y = 0;
+if (y &gt; room_height) y = room_height;
+
 //debug
 if (keyboard_check(vk_escape)) game_end();
 if (keyboard_check(ord('R'))) game_restart();
 
-if (keyboard_check_pressed(ord('Q'))) hurt = 1 - hurt;
+if (global.debug) {
+    if (keyboard_check_pressed(ord('Q'))) hurt = 1 - hurt;
+    if (keyboard_check_pressed(ord('W'))) godMode = 1 - godMode;
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="4" ename="obj_sushi">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if (abs(y-other.y) &lt; 8 &amp;&amp; other.fall == 1) {
+    if (hurt) {
+        maxHp = maxHp*0.8;
+        hp = maxHp;
+        hurt = 0;
+    }
+    f = instance_create(x, y, obj_flash);
+    f.sprite_index = sprite_index;
+    f.image_single = image_index;
+    f.face = face;
+    f.target = self;
+    
+    with(other) instance_destroy();
+}
 </string>
           </argument>
         </arguments>
@@ -244,7 +291,10 @@ if (keyboard_check_pressed(ord('Q'))) hurt = 1 - hurt;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (other.type &amp;&amp; abs(y-other.y) &lt; 8) hurt = 1;
+            <string>if (other.type &amp;&amp; abs(y-other.y) &lt; 8 &amp;&amp; !godMode) {
+    hurt = 1;
+    obj_controller.shake = 5;
+}
 </string>
           </argument>
         </arguments>
@@ -275,6 +325,10 @@ draw_set_color(c_red);
 draw_ellipse(x - 8 + 1 - 1, y + 8 - 3 + 1, x + 8 - 1 - 1, y + 8 + 3 - 1, 0);
 */
 
+draw_set_alpha(0.4);
+draw_set_color(c_black);
+draw_ellipse(x - 6 - 1, y + 8 - 2, x + 6 - 1, y + 8 + 3, 0);
+
 draw_set_alpha(1);
 
 var canFlash;
@@ -286,30 +340,6 @@ if (hurt &amp;&amp; hp &gt; 0 &amp;&amp; canFlash &gt; 0.9) {
 draw_sprite_ext(sprite_index, image_index, x, y, image_xscale * face, image_yscale, image_angle, image_blend, image_alpha);
 
 d3d_set_fog(0, c_black, 0, 0);
-
-draw_set_alpha(1 - obj_controller.titleAlpha);
-//Health Background
-draw_set_color(c_black);
-draw_rectangle(view_xview + 4 + 32 - 8, view_yview + view_hview - 4 - 8, view_xview + view_wview - 4 - 8, view_yview + view_hview - 12 - 8, 0);
-
-//Health Bar
-draw_set_color(healthColor);
-if (hp &gt; 0) draw_rectangle(view_xview + 4 + 32 - 8, view_yview + view_hview - 4 - 8, view_xview + 4 + 32 - 8 + (view_wview - 4 - 32 - 4)*hp, view_yview + view_hview - 12 - 8, 0);
-
-//Health Border
-draw_set_color(c_white);
-draw_rectangle(view_xview + 3 + 32 - 8, view_yview + view_hview - 4 - 8, view_xview + view_wview - 4 - 8, view_yview + view_hview - 13 - 8, 1);
-
-if (hp &gt; 0) hudSpeed += 0.2 - 0.15*hurt;
-else hudSpeed = attackCount;
-
-var spr;
-if (hurt) {
-    if (hp &gt; 0) spr = spr_ninja_injured;
-    else spr = spr_ninja_die;
-}
-else spr = spr_ninja_stand; 
-draw_sprite_ext(spr, hudSpeed, view_xview + 24, view_yview + view_hview - 32, 3 * face, 3, image_angle, image_blend, 1 - obj_controller.titleAlpha);
 
 depth = -y;
 </string>
