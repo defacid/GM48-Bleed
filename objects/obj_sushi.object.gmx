@@ -49,12 +49,16 @@ fall = 0;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (fall &lt; 1) fall += fall/10 + 0.05;
+            <string>var displayOffset;
+if (os_type == os_macosx || os_type == os_unknown) displayOffset = 1;
+else displayOffset = 0;
+
+if (fall &lt; 1) fall += fall/10 + 0.05;
 else fall = 1;
 
 draw_set_alpha(0.4 * fall);
 draw_set_color(c_black);
-draw_ellipse(x - 6 - 1 - 16*(1-fall) - sin(current_time/100)/2, y + 4 - 3 - 8*(1-fall) - sin(current_time/100)/2, x + 6 - 1 + 16*(1-fall) + sin(current_time/100)/2, y + 4 + 3 + 8*(1-fall) + sin(current_time/100)/2, 0);
+draw_ellipse(x - 6 - 1 - 16*(1-fall) + sin(current_time/100)/2 + displayOffset, y + 4 - 3 - 8*(1-fall) + sin(current_time/100)/2 + displayOffset, x + 6 - 1 + 16*(1-fall) - sin(current_time/100)/2 + displayOffset, y + 4 + 3 + 8*(1-fall) - sin(current_time/100)/2 + displayOffset, 0);
 
 draw_sprite_ext(sprite_index, 0, x, y - 32*(1-fall) + sin(current_time/100), 1, 1, 0, c_white, fall*1.5);
 

@@ -29,11 +29,11 @@
 fadeAlpha = 1;
 fadeColor = c_black;
 titleAlpha = 1;
-alarm[0] = room_speed*5;
+alarm[0] = room_speed*3;
 
 shake = 0;
 
-time = room_speed*20;
+time = room_speed*15;
 
 shift = 64;
 shiftChange = 0.75;
@@ -135,7 +135,11 @@ time = 0.9*time;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//Draw HUD
+            <string>var displayOffset;
+if (os_type == os_macosx || os_type == os_unknown) displayOffset = 0.5;
+else displayOffset = 0;
+
+//Draw HUD
 var vOff;
 vOff = 128*titleAlpha;
 
@@ -153,7 +157,7 @@ if (obj_player.hp &gt; 0) draw_rectangle(view_xview + 4 + 32 - 8 + random(shake)
 
 //Health Border
 draw_set_color(c_white);
-draw_rectangle(view_xview + 3 + 32 - 8 + random(shake), view_yview + view_hview - 4 - 8 + vOff + random(shake), view_xview + 4 + 32 - 8 + view_wview*0.75*obj_player.maxHp + random(shake), view_yview + view_hview - 13 - 8 + vOff + random(shake), 1);
+draw_rectangle(view_xview + 3 + 32 - 8 + random(shake) + displayOffset, view_yview + view_hview - 4 - 8 + vOff + random(shake) + displayOffset*2, view_xview + 4 + 32 - 8 + view_wview*0.75*obj_player.maxHp + random(shake) + displayOffset, view_yview + view_hview - 13 - 8 + vOff + random(shake) + displayOffset*2, 1);
 
 if (obj_player.hp &gt; 0) obj_player.hudSpeed += 0.2 - 0.15*obj_player.hurt;
 else obj_player.hudSpeed = obj_player.attackCount;
@@ -190,7 +194,7 @@ if (step != 2) {
     
     if (titleAlpha &lt;= 0) {
         step = 2;
-        alarm[1] = room_speed*3;
+        alarm[1] = room_speed*1;
     }
 }
 

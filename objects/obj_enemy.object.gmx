@@ -41,11 +41,14 @@ attackCount = 0;
 attackType = round(random(1));
 
 move = 0;
+path = 1;
 
 pool = 0;
 
 roll = random(1);
 alarm[0] = room_speed/2;
+
+inbounds = 0;
 </string>
           </argument>
         </arguments>
@@ -102,7 +105,7 @@ if (canAttack) {
     
     if (dir &gt; 90 &amp;&amp; dir &lt; 270) face = -1;
     else face = 1;
-    
+        
     if (dis &lt; 16 &amp;&amp; !hurt &amp;&amp; !obj_player.hurt) {
         move = 2;
         canAttack = 0;
@@ -128,11 +131,11 @@ if (canAttack) {
         
         if (roll &lt; 0.5 &amp;&amp; safe &amp;&amp; !obj_player.hurt) {
             move = 1;
-            if (obj_player.x &gt; x + 1) x += 2;
-            else if (obj_player.x &lt; x - 1) x -= 2;
+            if (obj_player.x &gt; x + 1) x += acc;
+            else if (obj_player.x &lt; x - 1) x -= acc;
             
-            if (obj_player.y &gt; y + 1) y += 2;
-            else if (obj_player.y &lt; y - 1) y -= 2;
+            if (obj_player.y &gt; y + 1) y += acc;
+            else if (obj_player.y &lt; y - 1) y -= acc;
         }
         
         if (!safe) {
@@ -141,42 +144,62 @@ if (canAttack) {
             if (instance_exists(obj_sushi) &amp;&amp; hurt &amp;&amp; roll &lt; 0.2) {
                 var sushi;
                 sushi = instance_nearest(x, y, obj_sushi);
-                if (sushi.x &gt; x) x -= 2;
-                else if (sushi.x &lt; x) x += 2;
+                if (sushi.x &gt; x) x -= acc;
+                else if (sushi.x &lt; x) x += acc;
                 
-                if (sushi.y &gt; y) y -= 2;
-                else if (sushi.y &lt; y) y += 2;
+                if (sushi.y &gt; y) y -= acc;
+                else if (sushi.y &lt; y) y += acc;
             }
-            else if (dis &lt; 64) {
-                if (obj_player.x &gt; x) x -= 2;
-                else if (obj_player.x &lt; x) x += 2;
+            else if (dis &lt; 64 &amp;&amp; roll &lt; 0.7) {
+                if (obj_player.x &gt; x) x -= acc;
+                else if (obj_player.x &lt; x) x += acc;
                 
-                if (obj_player.y &gt; y) y -= 2;
-                else if (obj_player.y &lt; y) y += 2;
+                if (obj_player.y &gt; y) y -= acc;
+                else if (obj_player.y &lt; y) y += acc;
             }
         }
         
         if (roll &gt; 0.85) {
             move = 1;
-            x += lengthdir_x(2, dir - 90);
-            y += lengthdir_y(2, dir - 90);
+            x += lengthdir_x(acc, dir - 90);
+            y += lengthdir_y(acc, dir - 90);
         }
         else if (roll &gt; 0.7) {
             move = 1;
-            x += lengthdir_x(2, dir + 90);
-            y += lengthdir_y(2, dir + 90);
+            x += lengthdir_x(acc, dir + 90);
+            y += lengthdir_y(acc, dir + 90);
+        }
+        
+        if (roll &lt; 0.1 &amp;&amp; dis &lt; 24) {
+            move = 5;
+            path = 1 - 2*irandom(1);
+            canAttack = 0;
         }
     }
 }
 else {
     switch(move) {
+        case 5:
+            // Roll
+            if (attackCount &lt; image_number - 1) {
+                attackCount += 0.5;
+                image_index = attackCount * path;
+            }
+            else {
+                attackCount = 0;
+                canAttack = 1;
+                move = 0;
+            }
+        break;
         case 4:
+            // Die
             if (attackCount &lt; image_number - 1) {
                 attackCount += 0.25;
                 image_index = attackCount;
             }
         break;
         case 3:
+            // Turn
             if (attackCount &lt; image_number - 1) {
                 attackCount += 0.5;
                 image_index = attackCount;
@@ -189,6 +212,7 @@ else {
             }   
         break;
         case 2:
+            //Attack
             attackCount += 1;
             image_index = attackCount + attackType * 4;
             if (attackCount &gt; 3) {
@@ -200,6 +224,11 @@ else {
 }
 
 switch(move) {
+    case 5:
+        image_speed = 0;
+        if (sprite_index != spr_ninja_roll) sprite_index = spr_ninja_roll;
+        x += 3 * path * face;
+    break;
     case 4:
         image_speed = 0;
         if (sprite_index != spr_ninja_die) sprite_index = spr_ninja_die;
@@ -258,6 +287,14 @@ else {
     if (hp &lt; 1) hp += (1-hp)/10 + 0.001;
     else hp = 1;
 }
+
+if (inbounds) {
+    if (x &lt; 0) x = 0;
+    if (x &gt; room_width) x = room_width;
+    if (y &lt; 0) y = 0;
+    if (y &gt; room_height) y = room_height;
+}
+else if (x &gt; 0 &amp;&amp; x &lt; room_width &amp;&amp; y &gt; 0 &amp;&amp; y &lt; room_height) inbounds = 1;
 </string>
           </argument>
         </arguments>
@@ -280,7 +317,7 @@ else {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (abs(y-other.y) &lt; 8 &amp;&amp; other.fall == 1) {
+            <string>if (abs(y-other.y) &lt; 8 &amp;&amp; hp &gt; 0 &amp;&amp; other.fall == 1) {
     hurt = 0;
     
     f = instance_create(x, y, obj_flash);
@@ -313,7 +350,7 @@ else {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (!other.type &amp;&amp; abs(y-other.y) &lt; 8) hurt = 1;
+            <string>if (!other.type &amp;&amp; abs(y-other.y) &lt; 8 &amp;&amp; move != 5) hurt = 1;
 </string>
           </argument>
         </arguments>
@@ -336,9 +373,13 @@ else {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>draw_set_alpha(0.4);
+            <string>var displayOffset;
+if (os_type == os_macosx || os_type == os_unknown) displayOffset = 0.5;
+else displayOffset = 0;
+
+draw_set_alpha(0.4);
 draw_set_color(c_black);
-draw_ellipse(x - 6 - 1, y + 8 - 2, x + 6 - 1, y + 8 + 3, 0);
+draw_ellipse(x - 6 - 1 + displayOffset, y + 8 - 2 + displayOffset*2, x + 6 - 1 + displayOffset, y + 8 + 3 + displayOffset*2, 0);
 
 var canFlash;
 canFlash = random(1);

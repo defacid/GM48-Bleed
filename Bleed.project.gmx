@@ -8,6 +8,7 @@
   <sprites name="sprites">
     <sprites name="Ninja">
       <sprite>sprites\spr_ninja_stand</sprite>
+      <sprite>sprites\spr_ninja_roll</sprite>
       <sprite>sprites\spr_ninja_attack</sprite>
       <sprite>sprites\spr_ninja_turn</sprite>
       <sprite>sprites\spr_ninja_limp</sprite>
