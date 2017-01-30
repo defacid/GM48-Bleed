@@ -170,7 +170,7 @@ if (canAttack) {
             y += lengthdir_y(acc, dir + 90);
         }
         
-        if (roll &lt; 0.1 &amp;&amp; dis &lt; 24) {
+        if (roll &lt; 0.1 &amp;&amp; dis &lt; 24 &amp;&amp; !hurt) {
             move = 5;
             path = 1 - 2*irandom(1);
             canAttack = 0;
@@ -196,6 +196,8 @@ else {
             if (attackCount &lt; image_number - 1) {
                 attackCount += 0.25;
                 image_index = attackCount;
+                
+                if (attackCount == image_number - 1) global.killCount += 1;
             }
         break;
         case 3:

@@ -31,14 +31,15 @@ fadeColor = c_black;
 titleAlpha = 1;
 alarm[0] = room_speed*3;
 
+time = room_speed*8;
 shake = 0;
-
-time = room_speed*15;
 
 shift = 64;
 shiftChange = 0.75;
 
 global.debug = 1;
+global.killCount = 0;
+global.eatCount = 0;
 </string>
           </argument>
         </arguments>
@@ -89,7 +90,7 @@ instance_create(32 + random(room_width - 64), 32 + random(room_height - 64), obj
 
 alarm[1] = time;
 
-time = 0.9*time;
+time = room_speed + 0.9*time;
 </string>
           </argument>
         </arguments>
@@ -179,10 +180,10 @@ draw_set_color(c_red);
 draw_set_alpha(titleAlpha);
 
 draw_set_font(fnt_title);
-draw_text(view_xview + view_wview/2 + shift, view_yview - 28, "BLEED");
+draw_text(view_xview + view_wview/2 + shift, view_yview - 18, "BLEED");
 
 draw_set_font(fnt_text);
-draw_text(view_xview + view_wview/2 - shift, view_yview + view_hview - 36, "CREATED BY DEFACID FOR GM48");
+draw_text(view_xview + view_wview/2 - shift, view_yview + view_hview - 42, "CREATED BY DEFACID FOR GM48");
 
 
 if (step != 2) {
@@ -190,33 +191,41 @@ if (step != 2) {
     shift -= shiftChange;
     if (step == 1) shiftChange = shiftChange * 1.1;
     
-    if (shift &lt; -128) titleAlpha -= titleAlpha/20 + 0.001;
+    if (shift &lt; -64) titleAlpha -= titleAlpha/15 + 0.001;
     
     if (titleAlpha &lt;= 0) {
         step = 2;
-        alarm[1] = room_speed*1;
+        alarm[1] = room_speed/4;
     }
 }
 
 // Draw Fade 
-draw_set_alpha(fadeAlpha);
+if (fadeColor == c_red) draw_set_alpha(fadeAlpha*0.6);
+else draw_set_alpha(fadeAlpha);
 draw_set_color(fadeColor);
 draw_rectangle(-1, -1, room_width, room_height, 0);
 
 
 //Draw Game Over
 if (obj_player.hp &lt;= 0) {
-    if (titleAlpha &lt; 1) titleAlpha += 0.05;
-    if (fadeAlpha &lt; 0.75) fadeAlpha += 0.01;
+    if (fadeAlpha &lt; 1) fadeAlpha += (1-fadeAlpha)/(room_speed/2) + 0.001;
+    if (titleAlpha &lt; 1 &amp;&amp; fadeAlpha &gt; 0.75) titleAlpha += (1-titleAlpha)/(room_speed/2) + 0.001;
     fadeColor = c_red;
     
     draw_set_alpha(titleAlpha);
     draw_set_color(c_white);
     draw_set_font(fnt_die);
-    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 - 64, "YOU DIED");
+    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 - 58 - 100*(1-fadeAlpha), "YOU DIED");
     draw_set_font(fnt_tiny);
     draw_set_color(c_white);
-    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 + 36, "Press [R] to Restart");
+    draw_text(view_xview + view_wview/2, view_yview + view_hview - 32 + 64*(1-titleAlpha), "Press [R] to Restart");
+    
+    draw_set_font(fnt_text);
+    draw_sprite_ext(spr_ninja_die, sprite_get_number(spr_ninja_die) - 1, view_xview + view_wview/4 - 24 + 24 - 100*(1-titleAlpha), view_yview + 26 - 8 * 2, 2, 2, 0, c_white, titleAlpha);
+    draw_text(view_xview + view_wview/4 + 24 + 24 - 100*(1-titleAlpha), view_yview + 10, "X " + string(global.killCount));
+    
+    draw_sprite_ext(spr_sushi, 0, view_xview + view_wview*3/4 - 18 - 24 + 100*(1-titleAlpha), view_yview + 26, 2, 2, 0, c_white, titleAlpha);
+    draw_text(view_xview + view_wview*3/4 + 18 - 24 + 100*(1-titleAlpha), view_yview + 10, "X " + string(global.eatCount));
 }
 
 draw_set_alpha(1);
