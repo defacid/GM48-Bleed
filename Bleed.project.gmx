@@ -4,7 +4,17 @@
     <Config>Configs\Default</Config>
   </Configs>
   <NewExtensions/>
-  <sounds name="sound"/>
+  <sounds name="sound">
+    <sound>sound\snd_splashSound</sound>
+    <sound>sound\snd_equip</sound>
+    <sound>sound\snd_slice</sound>
+    <sound>sound\snd_slice2</sound>
+    <sound>sound\snd_hit</sound>
+    <sound>sound\snd_die</sound>
+    <sound>sound\snd_sushiGet</sound>
+    <sound>sound\snd_sushiFall</sound>
+    <sound>sound\bgm_battle</sound>
+  </sounds>
   <sprites name="sprites">
     <sprites name="Ninja">
       <sprite>sprites\spr_ninja_stand</sprite>
@@ -15,9 +25,11 @@
       <sprite>sprites\spr_ninja_injured</sprite>
       <sprite>sprites\spr_ninja_die</sprite>
       <sprite>sprites\spr_ninja_walk</sprite>
+      <sprite>sprites\spr_ninja_run</sprite>
     </sprites>
     <sprite>sprites\spr_slice</sprite>
     <sprite>sprites\spr_sushi</sprite>
+    <sprite>sprites\spr_logo</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\bkg_bamboo</background>
@@ -37,8 +49,10 @@
     <object>objects\obj_controller</object>
     <object>objects\obj_flash</object>
     <object>objects\obj_sushi</object>
+    <object>objects\obj_splash</object>
   </objects>
   <rooms name="rooms">
+    <room>rooms\rm_splash</room>
     <room>rooms\rm_game</room>
   </rooms>
   <help>

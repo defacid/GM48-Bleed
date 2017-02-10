@@ -118,14 +118,20 @@ if (canAttack) {
         o.type = 1; //Make it an enemy slash
     }
     else {
-        var safe;
+        var safe, safeDis;
         if (hurt) safe = 0;
         else safe = 1;
         
         if (instance_exists(obj_slice)) {
             if (!instance_nearest(x, y, obj_slice).type) {
-                if (obj_player.face != face &amp;&amp; dis &lt; 64) safe = 0;
-                else if (dis &lt; 24) safe = 0;
+                if (obj_player.face != face &amp;&amp; dis &lt; 32) {
+                    safe = 0;
+                    safeDis = 32;
+                }
+                else if (dis &lt; 16) {
+                    safe = 0;
+                    safeDis = 16;
+                }
             }
         }
         
@@ -139,18 +145,25 @@ if (canAttack) {
         }
         
         if (!safe) {
+            roll = 1;
+        }
+        
+        if (roll &gt; 0.95) {
             move = 1;
             
-            if (instance_exists(obj_sushi) &amp;&amp; hurt &amp;&amp; roll &lt; 0.2) {
+            var dangerRoll = random(1);
+            
+            if (instance_exists(obj_sushi) &amp;&amp; hurt &amp;&amp; dangerRoll &lt; 0.3) {
                 var sushi;
                 sushi = instance_nearest(x, y, obj_sushi);
+                
                 if (sushi.x &gt; x) x -= acc;
                 else if (sushi.x &lt; x) x += acc;
                 
                 if (sushi.y &gt; y) y -= acc;
                 else if (sushi.y &lt; y) y += acc;
             }
-            else if (dis &lt; 64 &amp;&amp; roll &lt; 0.7) {
+            else if (dis &lt; safeDis &amp;&amp; dangerRoll &lt; 0.7) {
                 if (obj_player.x &gt; x) x -= acc;
                 else if (obj_player.x &lt; x) x += acc;
                 
@@ -158,8 +171,7 @@ if (canAttack) {
                 else if (obj_player.y &lt; y) y += acc;
             }
         }
-        
-        if (roll &gt; 0.85) {
+        else if (roll &gt; 0.85) {
             move = 1;
             x += lengthdir_x(acc, dir - 90);
             y += lengthdir_y(acc, dir - 90);

@@ -58,9 +58,9 @@ else fall = 1;
 
 draw_set_alpha(0.4 * fall);
 draw_set_color(c_black);
-draw_ellipse(x - 6 - 1 - 16*(1-fall) + sin(current_time/100)/4 + displayOffset, y + 3 - 3 - 8*(1-fall) + sin(current_time/100)/4 + displayOffset, x + 6 - 1 + 16*(1-fall) - sin(current_time/100)/4 + displayOffset, y + 3 + 3 + 8*(1-fall) - sin(current_time/100)/4 + displayOffset, 0);
+draw_ellipse(x - 6 - 1 - 16*(1-fall) + sin(current_time/100)/3 + displayOffset, y + 3 - 3 - 8*(1-fall) + sin(current_time/100)/3 + displayOffset, x + 6 - 1 + 16*(1-fall) - sin(current_time/100)/3 + displayOffset, y + 3 + 3 + 8*(1-fall) - sin(current_time/100)/3 + displayOffset, 0);
 
-draw_sprite_ext(sprite_index, 0, x, y - 64*(1-fall) + sin(current_time/100), 1, 1, 0, c_white, fall*1.5);
+draw_sprite_ext(sprite_index, 0, x, y - 64*(1-fall) + sin(current_time/100)*2 - 2, 1, 1, 0, c_white, fall*1.5);
 
 depth = -y;
 </string>

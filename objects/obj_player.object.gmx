@@ -26,7 +26,7 @@
           <argument>
             <kind>1</kind>
             <string>image_speed = 0.1;
-maxSpeed = 1;
+maxSpeed = 21;
 
 hurt = 0;
 maxHp = 1;
@@ -67,13 +67,22 @@ godMode = 0;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>//Auto Strafe
-
+            <string>// Unified Strafe Toggling
 var acc;
 acc = 2 - hurt;
 
 if (canAttack) {
     move = 0;
+    
+    var canTurn = 1 - global.autoStrafe;
+    
+    if (keyboard_check_pressed(vk_shift) &amp;&amp; global.autoStrafe) {
+        face = -face;
+    }
+    
+    if (keyboard_check(vk_shift) &amp;&amp; !global.autoStrafe) {
+        canTurn = 0;
+    }
     
     if (keyboard_check_pressed(ord('Z')) &amp;&amp; !hurt) {
         move = 2;
@@ -101,21 +110,23 @@ if (canAttack) {
         if (keyboard_check(vk_left)) {
             move = 1;
             x -= acc;
+            
+            if (canTurn) face = -1;
+            
             path = -face;
         }
         
         if (keyboard_check(vk_right)) {
             move = 1;
             x += acc;
+            
+            if (canTurn) face = 1;
+            
             path = face;
         }
     }
     
-    if (keyboard_check_pressed(ord('X'))) {
-        face = -face;
-    }
-    
-    if (keyboard_check_pressed(ord('C')) &amp;&amp; !hurt) {
+    if (keyboard_check_pressed(ord('X')) &amp;&amp; !hurt) {
         move = 5;
         canAttack = 0;
     }
@@ -260,205 +271,19 @@ if (x &gt; room_width) x = room_width;
 if (y &lt; 0) y = 0;
 if (y &gt; room_height) y = room_height;
 
-//debug
-if (keyboard_check(vk_escape)) game_end();
-if (keyboard_check(ord('R'))) game_restart();
-
-if (global.debug) {
-    if (keyboard_check_pressed(ord('Q'))) hurt = 1 - hurt;
-    if (keyboard_check_pressed(ord('W'))) godMode = 1 - godMode;
-}
-</string>
-          </argument>
-        </arguments>
-      </action>
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>//Manual Strafe
-/*var acc, canFace;
-acc = 2 - hurt;
-canFace = 1;
-
-if (canAttack) {
-    move = 0;
-    if (keyboard_check(ord('X'))) {
-        canFace = 0;
-    }
-    
-    if (keyboard_check_pressed(ord('Z')) &amp;&amp; !hurt) {
-        move = 2;
-        canAttack = 0;
-        attackType = round(random(1));
-        
-        o = instance_create(x + 8*face, y, obj_slice);
-        o.image_xscale = 1.5*face;
-        o.image_yscale = 1.5;
-        o.image_single = attackType;
-    }
-    else {
-        if (keyboard_check(vk_up)) {
-            move = 1;
-            y -= acc;
-        }
-        
-        if (keyboard_check(vk_down)) {
-            move = 1;
-            y += acc;
-        }
-        
-        if (keyboard_check(vk_left)) {
-            move = 1;
-            x -= acc;
-            if (canFace) face = -1;
-        }
-        
-        if (keyboard_check(vk_right)) {
-            move = 1;
-            x += acc;
-            if (canFace) face = 1;
-        }
-    }
-}
-else {
-    switch(move) {
-        case 4:
-            if (attackCount &lt; image_number - 1) {
-                attackCount += 0.25;
-                image_index = attackCount;
-            }
-        break;
-        case 3:
-            if (attackCount &lt; image_number - 1) {
-                attackCount += 0.5;
-                image_index = attackCount;
-            }
-            else {
-                attackCount = 0;
-                canAttack = 1;
-                face = -face;
-                move = 0;
-            }   
-        break;
-        case 2:
-            attackCount += 1;
-            image_index = attackCount + attackType * 4;
-            if (attackCount &gt; 3) {
-                attackCount = 0;
-                canAttack = 1;
-            }
-        break;
-    }
-}
-
-switch(move) {
-    case 4:
-        image_speed = 0;
-        if (sprite_index != spr_ninja_die) sprite_index = spr_ninja_die;
-    break;
-    case 3:
-    //IGNORE THIS ATM
-        image_speed = 0;
-        if (sprite_index != spr_ninja_turn) sprite_index = spr_ninja_turn;
-    break;
-    case 2:
-        image_speed = 0;
-        if (sprite_index != spr_ninja_attack) sprite_index = spr_ninja_attack;
-    break;
-    case 1:
-        if (hurt) {
-            image_speed = 0.25;
-            if (sprite_index != spr_ninja_limp) sprite_index = spr_ninja_limp;
-        }
-        else {
-            image_speed = 0.5;
-            if (sprite_index != spr_ninja_walk) sprite_index = spr_ninja_walk;
-        }
-    break;
-    case 0:
-        if (hurt) {
-            image_speed = 0.05;
-            if (sprite_index != spr_ninja_injured) sprite_index = spr_ninja_injured;
-        }
-        else {
-            image_speed = 0.2;
-            if (sprite_index != spr_ninja_stand) sprite_index = spr_ninja_stand;
-        }
-    break;
-}
-
-if (hurt) {
-    healthColor = c_white;
-    if (hp &gt; 0) hp -= 0.005;
-    else {
-        move = 4;
-        canAttack = 0;
-        hp = 0;
-    }
-    
-    if (move == 0 || move == 4) {
-        if (pool &lt; 10) pool += 0.05;
-    }
-    else pool = 0;
-    
-    var canBleed;
-    canBleed = random(1);
-    if (canBleed &gt; 0.60 &amp;&amp; pool &lt; 10) tile_add(bkg_blood, irandom(3)*16, irandom(1)*16, 16, 16, x - 8 + pool*(1 - random(2)), y - 3 + pool*(1 - random(2))/2, 1000001);
-}
-else {
-    healthColor = c_red;
-    if (hp &lt; maxHp) hp += (1-hp)/10 + 0.001;
-    else hp = maxHp;
-}
-
-/*
-var acc;
-acc = 0.2;
-
-if (speed &gt; 0.1) {
-    motion_add(direction + 180, speed/10);
-    image_speed = 0.2;
-    if (sprite_index != spr_ninja_walk) sprite_index = spr_ninja_walk;
-}
-else {
-    speed = 0;
-    image_speed = 0.075;
-    if (sprite_index != spr_ninja_stand) sprite_index = spr_ninja_stand;
-}
-
-if (keyboard_check(vk_up)) motion_add(90, acc);
-if (keyboard_check(vk_down)) motion_add(270, acc);
-if (keyboard_check(vk_left)) motion_add(180, acc);
-if (keyboard_check(vk_right)) motion_add(0, acc);
-
-if (speed &gt; maxSpeed) speed = maxSpeed;
-*/
-
-/*
-if (x &lt; 0) x = 0;
-if (x &gt; room_width) x = room_width;
-if (y &lt; 0) y = 0;
-if (y &gt; room_height) y = room_height;
+maxSpeed = 2;
 
 //debug
 if (keyboard_check(vk_escape)) game_end();
-if (keyboard_check(ord('R'))) game_restart();
 
 if (global.debug) {
+    // Room reset
+    if (keyboard_check_pressed(ord('G'))) room_restart();
+    // Game Reset
+    if (keyboard_check_pressed(ord('T'))) game_restart();
+    // Toggle hurt player
     if (keyboard_check_pressed(ord('Q'))) hurt = 1 - hurt;
+    // Toggle God Mode
     if (keyboard_check_pressed(ord('W'))) godMode = 1 - godMode;
 }
 </string>
@@ -489,11 +314,14 @@ if (global.debug) {
         hp = maxHp;
         hurt = 0;
     }
+    
     f = instance_create(x, y, obj_flash);
     f.sprite_index = sprite_index;
     f.image_single = image_index;
     f.face = face;
     f.target = self;
+    
+    global.eatCount += 1;
     
     with(other) instance_destroy();
 }

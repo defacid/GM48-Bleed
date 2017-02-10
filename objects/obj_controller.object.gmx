@@ -25,17 +25,26 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>step = 0;
+            <string>step = 1;
 fadeAlpha = 1;
 fadeColor = c_black;
 titleAlpha = 1;
-alarm[0] = room_speed*3;
 
-time = room_speed*8;
+if (global.firstRun) {
+    time = room_speed*8;
+    global.firstRun = 0;
+}
+else {
+    time = room_speed*4;
+}
+
 shake = 0;
 
-shift = 64;
+shift = 240;
 shiftChange = 0.75;
+
+canReset = 0;
+resetLoad = 0;
 
 global.debug = 1;
 global.killCount = 0;
@@ -63,7 +72,7 @@ global.eatCount = 0;
           <argument>
             <kind>1</kind>
             <string>var xx, yy, edge;
-edge = irandom(3);
+edge = irandom(1);
 
 switch(edge) {
     case 0:
@@ -73,14 +82,6 @@ switch(edge) {
     case 1:
         xx = room_width+32;
         yy = random(room_height);
-    break;
-    case 2:
-        xx = random(room_width);
-        yy = -32;
-    break;
-    case 3:
-        xx = random(room_width);
-        yy = room_height + 32;
     break;
 }
 
@@ -113,7 +114,8 @@ time = room_speed + 0.9*time;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>step = 1;
+            <string>room_restart();
+//step = 1;
 </string>
           </argument>
         </arguments>
@@ -180,18 +182,27 @@ draw_set_color(c_red);
 draw_set_alpha(titleAlpha);
 
 draw_set_font(fnt_title);
-draw_text(view_xview + view_wview/2 + shift, view_yview - 18, "BLEED");
+draw_text_transformed(view_xview + view_wview/2 + shift, view_yview - 18, "BLEED", global.textScale, global.textScale, 0);
 
 draw_set_font(fnt_text);
-draw_text(view_xview + view_wview/2 - shift, view_yview + view_hview - 42, "CREATED BY DEFACID FOR GM48");
+draw_text_transformed(view_xview + view_wview/2 - shift, view_yview + view_hview - 42, "CREATED BY DEFACID FOR GM48", global.textScale, global.textScale, 0);
 
 
 if (step != 2) {
-    if (fadeAlpha &gt; 0) fadeAlpha -= 0.05;
+    if (fadeAlpha &gt; 0) fadeAlpha -= (1-fadeAlpha)/4 + 0.005;
     shift -= shiftChange;
-    if (step == 1) shiftChange = shiftChange * 1.1;
+    if (step == 1) {
+        if (shift &lt; 72 &amp;&amp; shift &gt; 0) {
+            if (shiftChange &gt; 0.15) shiftChange -= shiftChange/4;
+            else shiftChange = 0.15;
+        }
+        else {
+            if (global.firstRun) shiftChange = shiftChange * 1.05;
+            else shiftChange = shiftChange * 1.1;
+        }
+    }
     
-    if (shift &lt; -64) titleAlpha -= titleAlpha/15 + 0.001;
+    if (shift &lt; -64) titleAlpha -= titleAlpha/10 + 0.001;
     
     if (titleAlpha &lt;= 0) {
         step = 2;
@@ -215,17 +226,32 @@ if (obj_player.hp &lt;= 0) {
     draw_set_alpha(titleAlpha);
     draw_set_color(c_white);
     draw_set_font(fnt_die);
-    draw_text(view_xview + view_wview/2, view_yview + view_hview/2 - 58 - 100*(1-fadeAlpha), "YOU DIED");
+    draw_text_transformed(view_xview + view_wview/2, view_yview + view_hview/2 - 58 - 100*(1-fadeAlpha), "YOU DIED", global.textScale, global.textScale, 0);
     draw_set_font(fnt_tiny);
     draw_set_color(c_white);
-    draw_text(view_xview + view_wview/2, view_yview + view_hview - 32 + 64*(1-titleAlpha), "Press [R] to Restart");
+    draw_text_transformed(view_xview + view_wview/2, view_yview + view_hview - 32 + 64*(1-titleAlpha), "Press [R] to Restart", global.textScale, global.textScale, 0);
     
     draw_set_font(fnt_text);
     draw_sprite_ext(spr_ninja_die, sprite_get_number(spr_ninja_die) - 1, view_xview + view_wview/4 - 24 + 24 - 100*(1-titleAlpha), view_yview + 26 - 8 * 2, 2, 2, 0, c_white, titleAlpha);
-    draw_text(view_xview + view_wview/4 + 24 + 24 - 100*(1-titleAlpha), view_yview + 10, "X " + string(global.killCount));
+    draw_text_transformed(view_xview + view_wview/4 + 24 + 24 - 100*(1-titleAlpha), view_yview + 10, "X " + string(global.killCount), global.textScale, global.textScale, 0);
     
-    draw_sprite_ext(spr_sushi, 0, view_xview + view_wview*3/4 - 18 - 24 + 100*(1-titleAlpha), view_yview + 26, 2, 2, 0, c_white, titleAlpha);
-    draw_text(view_xview + view_wview*3/4 + 18 - 24 + 100*(1-titleAlpha), view_yview + 10, "X " + string(global.eatCount));
+    draw_sprite_ext(spr_sushi, 0, view_xview + view_wview*3/4 - 16 - 24 + 100*(1-titleAlpha), view_yview + 26, 2, 2, 0, c_white, titleAlpha);
+    draw_text_transformed(view_xview + view_wview*3/4 + 16 - 24 + 100*(1-titleAlpha), view_yview + 10, "X " + string(global.eatCount), global.textScale, global.textScale, 0);
+    
+    //Game reset transition
+    draw_set_color(c_black);
+    draw_set_alpha(1);
+    if (resetLoad &gt; 0) draw_rectangle(view_xview, view_yview, view_xview + view_wview, view_yview + view_hview*resetLoad, 0);
+    if (canReset &amp;&amp; resetLoad &lt; 1) {
+        resetLoad += (1-resetLoad)/(room_speed/4) + 0.001;
+        if (resetLoad &gt;= 1) {
+            resetLoad = 1;
+            alarm[0] = room_speed;
+        }
+    }
+    
+    if (keyboard_check_pressed(ord('R'))) canReset = 1;
+        
 }
 
 draw_set_alpha(1);
