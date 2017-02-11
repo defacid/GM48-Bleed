@@ -121,6 +121,7 @@ if (canAttack) {
         var safe, safeDis;
         if (hurt) safe = 0;
         else safe = 1;
+        safeDis = 48;
         
         if (instance_exists(obj_slice)) {
             if (!instance_nearest(x, y, obj_slice).type) {
