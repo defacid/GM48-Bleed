@@ -82,7 +82,7 @@ ang = 30;
 
 switch(step) {
     case 0:
-        dis = 180*(1-alpha) + 1;
+        dis = 90*(1-alpha) + 0.5;
         alpha += (1-alpha)/(room_speed/4) + 0.001;
         if (alpha &gt;= 1) {
             alpha = 1;
@@ -92,7 +92,7 @@ switch(step) {
     case 1:
         dis = 1;
         if (alpha &gt; 0) {
-            alpha -= 0.1;
+            alpha -= 0.05;
             if (alpha &lt;= 0) {
                 alpha = 0;
                 alarm[0] = room_speed;
@@ -109,12 +109,12 @@ switch(step) {
 
 if (step &lt;= 1) {
     draw_set_blend_mode(bm_add);
-    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 0 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 0 + ang), 0.5, 0.5, 0, c_red, alpha/2);
-    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 60 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 60 + ang), 0.5, 0.5, 0, c_fuchsia, alpha/2);
-    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 120 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 120 + ang), 0.5, 0.5, 0, c_orange, alpha/2);
-    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 180 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 180 + ang), 0.5, 0.5, 0, c_yellow, alpha/2);
-    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 240 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 240 + ang), 0.5, 0.5, 0, c_green, alpha/2);
-    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 300 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 300 + ang), 0.5, 0.5, 0, c_aqua, alpha/2);
+    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 0 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 0 + ang), 0.5, 0.5, 0, c_red, power(alpha, 4)*0.4);
+    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 60 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 60 + ang), 0.5, 0.5, 0, c_aqua, power(alpha, 4)*0.4);
+    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 120 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 120 + ang), 0.5, 0.5, 0, c_green, power(alpha, 4)*0.4);
+    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 180 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 180 + ang), 0.5, 0.5, 0, c_fuchsia, power(alpha, 4)*0.4);
+    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 240 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 240 + ang), 0.5, 0.5, 0, c_blue, power(alpha, 4)*0.4);
+    draw_sprite_ext(spr_logo, 0, view_xview + view_wview/2 + lengthdir_x(dis, 300 + ang), view_yview + view_hview/2 + lengthdir_y(dis, 300 + ang), 0.5, 0.5, 0, c_yellow, power(alpha, 4)*0.4);
     draw_set_blend_mode(bm_normal);
 }
 </string>
